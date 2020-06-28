@@ -142,13 +142,6 @@ void wyswietlWszystkieKontakty (vector<KsiazkaAdresowa> adresaci)
     for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
     {
         wyswietlKontakt(*itr);
-        /*cout<< itr->id<<endl;
-        cout<< itr->imie<<endl;
-        cout<< itr->nazwisko<<endl;
-        cout<< itr->telefon<<endl;
-        cout<< itr->email<<endl;
-        cout<< itr->adres<<endl;
-        system("pause");*/
     }
 }
 void wyszukajPoImieniu (string szukaneImie, vector<KsiazkaAdresowa> adresaci)
@@ -158,13 +151,6 @@ void wyszukajPoImieniu (string szukaneImie, vector<KsiazkaAdresowa> adresaci)
         if (itr->imie == szukaneImie)
         {
             wyswietlKontakt(*itr);
-            /*cout<< itr->id<<endl;
-            cout<< itr->imie<<endl;
-            cout<< itr->nazwisko<<endl;
-            cout<< itr->telefon<<endl;
-            cout<< itr->email<<endl;
-            cout<< itr->adres<<endl;
-            system("pause");*/
         }
     }
 }
@@ -176,13 +162,6 @@ void wyszukajPoNazwisku (string szukaneNazwisko, vector<KsiazkaAdresowa> adresac
         if (itr->nazwisko == szukaneNazwisko)
         {
             wyswietlKontakt(*itr);
-            /*cout<< itr->id<<endl;
-            cout<< itr->imie<<endl;
-            cout<< itr->nazwisko<<endl;
-            cout<< itr->telefon<<endl;
-            cout<< itr->email<<endl;
-            cout<< itr->adres<<endl;
-            system("pause");*/
         }
     }
 }
