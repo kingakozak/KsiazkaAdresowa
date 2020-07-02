@@ -46,9 +46,7 @@ int podajIdOstatniegoKontaktu ()
         int pozycja = poprzedniaLinia.find(znak);
         idOstatniegoKontaktu = atoi(poprzedniaLinia.substr(0,pozycja).c_str());
     }
-
     plik.close();
-
     return idOstatniegoKontaktu;
 }
 
@@ -61,7 +59,6 @@ void zapiszUzytkownikowDoPliku (vector<Uzytkownicy> listaUzytkownikow)
     {
         plik <<itr->idUzytkownika<<'|'<<itr->login<<'|'<<itr->haslo<<'|'<<endl;
     }
-
     plik.close();
 }
 
@@ -100,11 +97,10 @@ vector<Uzytkownicy> odczytajUzytkownikowZPliku (vector<Uzytkownicy> listaUzytkow
         }
     }
     plik.close();
-
     return listaUzytkownikow;
 }
 
-void zapiszDoPliku (vector<KsiazkaAdresowa> adresaci)
+void zapiszKontaktDoPliku (vector<KsiazkaAdresowa> adresaci)
 {
     fstream plik;
     plik.open("Kontakty.txt", ios::out | ios::app);
@@ -116,7 +112,7 @@ void zapiszDoPliku (vector<KsiazkaAdresowa> adresaci)
     plik.close();
 }
 
-void zapiszDoPlikuPoEdycji (vector<KsiazkaAdresowa> adresaci, int doEdycji)
+void zapiszKontaktDoPlikuPoEdycji (vector<KsiazkaAdresowa> adresaci, int doEdycji)
 {
     fstream plik, plikTymczasowy;
     plik.open("Kontakty.txt", ios::in);
@@ -141,7 +137,6 @@ void zapiszDoPlikuPoEdycji (vector<KsiazkaAdresowa> adresaci, int doEdycji)
             {
                 if (itr->id == doEdycji)
                 {
-
                     plikTymczasowy <<itr->id<<'|'<<itr->idUzytkownika<<'|'<<itr->imie<<'|'<<itr->nazwisko<<'|'<<itr->telefon<<'|'<<itr->email<<'|'<<itr->adres<<'|'<< endl;
                 }
             }
@@ -153,10 +148,9 @@ void zapiszDoPlikuPoEdycji (vector<KsiazkaAdresowa> adresaci, int doEdycji)
 
     remove("Kontakty.txt");
     rename("Kontakty_tymczasowy.txt","Kontakty.txt");
-
 }
 
-void zapiszDoPlikuPoUsunieciu (vector<KsiazkaAdresowa> adresaci, int doUsuniecia)
+void zapiszKontaktDoPlikuPoUsunieciu (vector<KsiazkaAdresowa> adresaci, int doUsuniecia)
 {
     fstream plik, plikTymczasowy;
     plik.open("Kontakty.txt", ios::in);
@@ -176,7 +170,6 @@ void zapiszDoPlikuPoUsunieciu (vector<KsiazkaAdresowa> adresaci, int doUsuniecia
             plikTymczasowy <<linia<< endl;
         }
     }
-
     plik.close();
     plikTymczasowy.close();
 
@@ -243,7 +236,6 @@ vector<KsiazkaAdresowa> odczytajZPliku (vector<KsiazkaAdresowa> adresaci, Ksiazk
         }
     }
     plik.close();
-
     return adresaci;
 }
 
@@ -265,7 +257,6 @@ vector<Uzytkownicy> rejestracja (vector<Uzytkownicy> listaUzytkownikow)
             itr = listaUzytkownikow.begin();
         }
     }
-
     cout<< "Haslo: "<<endl;
     cin >> haslo;
 
@@ -289,9 +280,10 @@ vector<Uzytkownicy> rejestracja (vector<Uzytkownicy> listaUzytkownikow)
     cout << "Konto zarejestrowane pomyslnie"<<endl;
     Sleep(1500);
 
+    zapiszUzytkownikowDoPliku (listaUzytkownikow);
     return listaUzytkownikow;
-
 }
+
 int logowanie (vector<Uzytkownicy> listaUzytkownikow)
 {
     string login, haslo;
@@ -317,12 +309,13 @@ int logowanie (vector<Uzytkownicy> listaUzytkownikow)
             Sleep(3000);
         }
     }
-
     return 0;
 }
 
-vector<KsiazkaAdresowa> stworzKontakt(vector<KsiazkaAdresowa> adresaci, int idUzytkownika, int idOstatniegoKontaktu)
+vector<KsiazkaAdresowa> stworzKontakt(vector<KsiazkaAdresowa> adresaci, int idUzytkownika)
 {
+    int idOstatniegoKontaktu = podajIdOstatniegoKontaktu ();
+
     string imie, nazwisko, telefon, email, adres;
     int id = 0;
 
@@ -345,8 +338,6 @@ vector<KsiazkaAdresowa> stworzKontakt(vector<KsiazkaAdresowa> adresaci, int idUz
 
     id = ++idOstatniegoKontaktu;
 
-    cout << idOstatniegoKontaktu<<"id ostatniego" <<endl;
-
     system("pause");
 
     kontakt.id = id;
@@ -359,6 +350,7 @@ vector<KsiazkaAdresowa> stworzKontakt(vector<KsiazkaAdresowa> adresaci, int idUz
 
     adresaci.push_back(kontakt);
 
+    zapiszKontaktDoPliku (adresaci);
     return adresaci;
 }
 void wyswietlKontakt (KsiazkaAdresowa kontakt)
@@ -374,135 +366,211 @@ void wyswietlKontakt (KsiazkaAdresowa kontakt)
 
 void wyswietlWszystkieKontakty (vector<KsiazkaAdresowa> adresaci)
 {
-    for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
+    if (adresaci.empty())
     {
-        wyswietlKontakt(*itr);
+        cout << "Nie ma zadnego kontaktu w ksiazce adresowej."<< endl;
+        Sleep(1500);
     }
-}
-void wyszukajPoImieniu (string szukaneImie, vector<KsiazkaAdresowa> adresaci)
-{
-    for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
+    else
     {
-        if (itr->imie == szukaneImie)
+        cout <<"Wszystkie kontakty z ksiazki adresowej:"<<endl;
+        for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
         {
             wyswietlKontakt(*itr);
         }
     }
 }
 
-void wyszukajPoNazwisku (string szukaneNazwisko, vector<KsiazkaAdresowa> adresaci)
+void wyszukajPoImieniu (vector<KsiazkaAdresowa> adresaci)
 {
-    for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
+    string szukaneImie, imie;
+    if (adresaci.empty())
     {
-        if (itr->nazwisko == szukaneNazwisko)
+        cout << "Nie ma zadnego kontaktu w ksiazce adresowej."<< endl;
+        Sleep(1500);
+    }
+    else
+    {
+        cout <<"Podaj szukane imie:"<<endl;
+        cin >> szukaneImie;
+        for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
         {
-            wyswietlKontakt(*itr);
+            if (itr->imie == szukaneImie)
+            {
+                wyswietlKontakt(*itr);
+            }
         }
     }
 }
 
-vector<KsiazkaAdresowa> usuwanieKontaktow (int doUsuniecia, vector<KsiazkaAdresowa>adresaci)
+void wyszukajPoNazwisku (vector<KsiazkaAdresowa> adresaci)
+{
+    string szukaneNazwisko, nazwisko;
+    if (adresaci.empty())
+    {
+        cout << "Nie ma zadnego kontaktu w ksiazce adresowej."<< endl;
+        Sleep(1500);
+    }
+    else
+    {
+        cout <<"Podaj szukane nazwisko:"<<endl;
+        cin >> szukaneNazwisko;
+        for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
+        {
+            if (itr->nazwisko == szukaneNazwisko)
+            {
+                wyswietlKontakt(*itr);
+            }
+        }
+    }
+}
+
+bool sprawdzCzyKontaktNalezyDoUzytkownika (vector<KsiazkaAdresowa>adresaci, int idDoZmiany)
 {
     for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
     {
-        if (itr->id == doUsuniecia)
+        if (itr->id == idDoZmiany)
         {
-            adresaci.erase(itr);
-            break;
+            return true;
         }
+    }
+    return false;
+}
+
+vector<KsiazkaAdresowa> usuwanieKontaktow (vector<KsiazkaAdresowa>adresaci)
+{
+    char usun;
+    int doUsuniecia;
+    cout <<" Podaj ID kontaktu, ktory chcesz usunac: "<<endl;
+    cin >> doUsuniecia;
+    bool sprawdzian = sprawdzCzyKontaktNalezyDoUzytkownika(adresaci,doUsuniecia);
+    if(sprawdzian == true)
+    {
+        cout <<" Czy napewno chcesz usunac istniejacy kontakt? Jezeli tak wcisnij klawisz 't' : "<<endl;
+        cin >> usun;
+        if (usun == 't')
+        {
+            for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
+            {
+                if (itr->id == doUsuniecia)
+                {
+                    adresaci.erase(itr);
+                    break;
+                }
+            }
+            cout << "Kontakt zostal usuniety" << endl;
+            Sleep(1500);
+            zapiszKontaktDoPlikuPoUsunieciu (adresaci, doUsuniecia);
+        }
+    }
+    else
+    {
+        cout <<" Nie ma kontaktu o podanym ID: "<<endl;
+        Sleep(1500);
     }
     return adresaci;
 }
 
-vector<KsiazkaAdresowa> edytowanieKontaktow (int doEdycji, vector<KsiazkaAdresowa>adresaci)
+vector<KsiazkaAdresowa> edytowanieKontaktow (vector<KsiazkaAdresowa>adresaci)
 {
     string noweImie, noweNazwisko, nowyTelefon, nowyEmail, nowyAdres;
     char wybor;
+    int doEdycji;
+    cout <<" Podaj ID kontaktu, ktory chcesz edytowac: "<<endl;
+    cin >> doEdycji;
+    bool sprawdzian = sprawdzCzyKontaktNalezyDoUzytkownika(adresaci,doEdycji);
+    if(sprawdzian == true)
+    {
+        system("cls");
+        cout << "1 - imie "<<endl;
+        cout << "2 - nazwisko "<<endl;
+        cout << "3 - telefon " <<endl;
+        cout << "4 - email "<<endl;
+        cout << "5 - adres "<<endl;
+        cout << "6 - powrot do MENU GLOWNEGO "<<endl;
+        cin >> wybor;
 
-    system("cls");
-    cout << "1 - imie "<<endl;
-    cout << "2 - nazwisko "<<endl;
-    cout << "3 - telefon " <<endl;
-    cout << "4 - email "<<endl;
-    cout << "5 - adres "<<endl;
-    cout << "6 - powrot do MENU GLOWNEGO "<<endl;
-    cin >> wybor;
-
-    if (wybor == '1')
-    {
-        cout << "Wprowadz imie: "<<endl;
-        cin >> noweImie;
-        for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
+        if (wybor == '1')
         {
-            if (itr->id == doEdycji)
+            cout << "Wprowadz imie: "<<endl;
+            cin >> noweImie;
+            for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
             {
-                itr ->imie =  noweImie;
+                if (itr->id == doEdycji)
+                {
+                    itr ->imie = noweImie;
+                }
             }
+            cout << "Imie zostalo zmienione"<<endl;
+            system("pause");
         }
-        cout << "Imie zostalo zmienione"<<endl;
-        system("pause");
-    }
-    if (wybor == '2')
-    {
-        cout << "Wprowadz nazwisko: "<<endl;
-        cin >> noweNazwisko;
-        for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
+        if (wybor == '2')
         {
-            if (itr->id == doEdycji)
+            cout << "Wprowadz nazwisko: "<<endl;
+            cin >> noweNazwisko;
+            for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
             {
-                itr ->nazwisko =  noweNazwisko;
+                if (itr->id == doEdycji)
+                {
+                    itr ->nazwisko = noweNazwisko;
+                }
             }
+            cout << "Nazwisko zostalo zmienione"<<endl;
+            system("pause");
         }
-        cout << "Nazwisko zostalo zmienione"<<endl;
-        system("pause");
-    }
-    if (wybor == '3')
-    {
-        cout << "Wprowadz telefon: "<<endl;
-        cin.sync();
-        getline(cin,nowyTelefon);
-        for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
+        if (wybor == '3')
         {
-            if (itr->id == doEdycji)
+            cout << "Wprowadz telefon: "<<endl;
+            cin.sync();
+            getline(cin,nowyTelefon);
+            for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
             {
-                itr ->telefon =  nowyTelefon;
+                if (itr->id == doEdycji)
+                {
+                    itr ->telefon = nowyTelefon;
+                }
             }
+            cout << "Telefon zostal zmieniony"<<endl;
+            system("pause");
         }
-        cout << "Telefon zostal zmieniony"<<endl;
-        system("pause");
-    }
-    if (wybor == '4')
-    {
-        cout << "Wprowadz email: "<<endl;
-        cin.sync();
-        getline(cin,nowyEmail);
-        for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
+        if (wybor == '4')
         {
-            if (itr->id == doEdycji)
+            cout << "Wprowadz email: "<<endl;
+            cin.sync();
+            getline(cin,nowyEmail);
+            for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
             {
-                itr ->email =  nowyEmail;
+                if (itr->id == doEdycji)
+                {
+                    itr ->email = nowyEmail;
+                }
             }
+            cout << "Email zostal zmieniony"<<endl;
+            system("pause");
         }
-        cout << "Email zostal zmieniony"<<endl;
-        system("pause");
-    }
-    if (wybor == '5')
-    {
-        cout << "Wprowadz adres: "<<endl;
-        cin.sync();
-        getline(cin,nowyAdres);
-        for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
+        if (wybor == '5')
         {
-            if (itr->id == doEdycji)
+            cout << "Wprowadz adres: "<<endl;
+            cin.sync();
+            getline(cin,nowyAdres);
+            for (vector<KsiazkaAdresowa>::iterator itr = adresaci.begin(); itr != adresaci.end(); itr++)
             {
-                itr ->adres =  nowyAdres;
+                if (itr->id == doEdycji)
+                {
+                    itr ->adres = nowyAdres;
+                }
             }
+            cout << "Adres zostal zmieniony"<<endl;
+            system("pause");
         }
-        cout << "Adres zostal zmieniony"<<endl;
-        system("pause");
+        if (wybor == '6') {}
+        zapiszKontaktDoPlikuPoEdycji (adresaci, doEdycji);
     }
-    if (wybor == '6') {}
-
+    else
+    {
+        cout <<" Nie ma kontaktu o podanym ID: "<<endl;
+        Sleep(1500);
+    }
     return adresaci;
 }
 
@@ -521,7 +589,30 @@ vector<Uzytkownicy> zmianaHasla (int idZalogowanegoUzytkownika, vector<Uzytkowni
             Sleep(1500);
         }
     }
+    zapiszUzytkownikowDoPliku (listaUzytkownikow);
     return listaUzytkownikow;
+}
+
+void wyswietlMenuUzytkownika ()
+{
+    system("cls");
+    cout << "1. Stworz nowy kontakt "<<endl;
+    cout << "2. Wyszukaj kontakt po imieniu "<<endl;
+    cout << "3. Wyszukaj kontakt po nazwisku " <<endl;
+    cout << "4. Wyswietl wszystkie kontakty "<<endl;
+    cout << "5. Usun kontakt "<<endl;
+    cout << "6. Edytuj kontakt "<<endl;
+    cout << "7. Zmien haslo "<<endl;
+    cout << "8. Wyloguj sie "<<endl;
+    cout << "Twoj wybor: "<<endl;
+}
+
+void wyswietlMenuGlowne ()
+{
+    system("cls");
+    cout << "1. Rejestracja "<<endl;
+    cout << "2. Logowanie "<<endl;
+    cout << "3. Zamknij program " <<endl;
 }
 
 int main()
@@ -530,29 +621,20 @@ int main()
     KsiazkaAdresowa kontakt;
     vector<Uzytkownicy> listaUzytkownikow;
     Uzytkownicy uzytkownik;
-
-    string imie, nazwisko;
     char wybor;
-    int id = 0;
     int idZalogowanegoUzytkownika = 0;
-    int idOstatniegoKontaktu = 0;
-
     listaUzytkownikow = odczytajUzytkownikowZPliku (listaUzytkownikow, uzytkownik);
 
     while(1)
     {
         if (idZalogowanegoUzytkownika == 0)
         {
-            system("cls");
-            cout << "1. Rejestracja "<<endl;
-            cout << "2. Logowanie "<<endl;
-            cout << "3. Zamknij program " <<endl;
+            wyswietlMenuGlowne();
             cin >> wybor;
 
             if (wybor == '1')
             {
                 listaUzytkownikow = rejestracja (listaUzytkownikow);
-                zapiszUzytkownikowDoPliku (listaUzytkownikow);
             }
             if (wybor == '2')
             {
@@ -569,95 +651,36 @@ int main()
         }
         else
         {
-            system("cls");
-            cout << "1. Stworz nowy kontakt "<<endl;
-            cout << "2. Wyszukaj kontakt po imieniu "<<endl;
-            cout << "3. Wyszukaj kontakt po nazwisku " <<endl;
-            cout << "4. Wyswietl wszystkie kontakty "<<endl;
-            cout << "5. Usun kontakt "<<endl;
-            cout << "6. Edytuj kontakt "<<endl;
-            cout << "7. Zmien haslo "<<endl;
-            cout << "8. Wyloguj sie "<<endl;
-            cout << "Twoj wybor: "<<endl;
+            wyswietlMenuUzytkownika();
             cin >> wybor;
 
             if (wybor == '1')
             {
-                idOstatniegoKontaktu = podajIdOstatniegoKontaktu ();
-                adresaci = stworzKontakt(adresaci, idZalogowanegoUzytkownika, idOstatniegoKontaktu);
-                zapiszDoPliku (adresaci);
+                adresaci = stworzKontakt(adresaci, idZalogowanegoUzytkownika);
             }
             if (wybor == '2')
             {
-                if (adresaci.empty())
-                {
-                    cout << "Nie ma zadnego kontaktu w ksiazce adresowej."<< endl;
-                    Sleep(1500);
-                }
-                else
-                {
-                    cout <<"Podaj szukane imie:"<<endl;
-                    cin >> imie;
-                    wyszukajPoImieniu (imie, adresaci);
-                }
+                wyszukajPoImieniu(adresaci);
             }
             if (wybor == '3')
             {
-                if (adresaci.empty())
-                {
-                    cout << "Nie ma zadnego kontaktu w ksiazce adresowej."<< endl;
-                    Sleep(1500);
-                }
-                else
-                {
-                    cout <<"Podaj szukane nazwisko:"<<endl;
-                    cin >> nazwisko;
-                    wyszukajPoNazwisku (nazwisko, adresaci);
-                }
+                wyszukajPoNazwisku(adresaci);
             }
             if (wybor == '4')
             {
-                if (adresaci.empty())
-                {
-                    cout << "Nie ma zadnego kontaktu w ksiazce adresowej."<< endl;
-                    Sleep(1500);
-                }
-                else
-                {
-                    cout <<"Wszystkie kontakty z ksiazki adresowej:"<<endl;
-                    wyswietlWszystkieKontakty(adresaci);
-                }
+                wyswietlWszystkieKontakty(adresaci);
             }
             if (wybor == '5')
             {
-                char usun;
-                int doUsuniecia;
-                cout <<" Podaj ID kontaktu, ktory chcesz usunac: "<<endl;
-                cin >> doUsuniecia;
-                cout <<" Czy napewno chcesz usunac istniejacy kontakt? Jezeli tak wcisnij klawisz 't' : "<<endl;
-                cin >> usun;
-                if (usun == 't')
-                {
-                    adresaci = usuwanieKontaktow (doUsuniecia, adresaci);
-                    cout << "Kontakt zostal usuniety" << endl;
-                    Sleep(1500);
-                    zapiszDoPlikuPoUsunieciu (adresaci, doUsuniecia);
-                }
+                adresaci = usuwanieKontaktow(adresaci);
             }
             if (wybor == '6')
             {
-                int doEdycji;
-                cout <<" Podaj ID kontaktu, ktory chcesz edytowac: "<<endl;
-                cin >> doEdycji;
-
-                adresaci = edytowanieKontaktow (doEdycji, adresaci);
-                zapiszDoPlikuPoEdycji (adresaci, doEdycji);
+                adresaci = edytowanieKontaktow(adresaci);
             }
-
             if (wybor == '7')
             {
-                listaUzytkownikow = zmianaHasla (idZalogowanegoUzytkownika, listaUzytkownikow);
-                zapiszUzytkownikowDoPliku (listaUzytkownikow);
+                listaUzytkownikow = zmianaHasla(idZalogowanegoUzytkownika, listaUzytkownikow);
             }
             if (wybor == '8')
             {
