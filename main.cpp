@@ -15,10 +15,32 @@ struct KsiazkaAdresowa
     int idUzytkownika = 0;
     string imie, nazwisko, telefon, email, adres;
 };
-struct Uzytkownicy
+
+class Uzytkownik
 {
-    int idUzytkownika = 0;
+private:
     string login, haslo;
+public:
+    int idUzytkownika;
+
+    Uzytkownik(int id, string loginUzytkownika, string hasloUzytkownika)
+    {
+        idUzytkownika=id;
+        login=loginUzytkownika;
+        haslo=hasloUzytkownika;
+    }
+    string pobierzLogin()
+    {
+        return login;
+    }
+    string pobierzHaslo()
+    {
+        return haslo;
+    }
+    void przypiszHaslo(string noweHaslo)
+    {
+        haslo = noweHaslo;
+    }
 };
 
 int podajIdOstatniegoKontaktu ()
@@ -50,19 +72,19 @@ int podajIdOstatniegoKontaktu ()
     return idOstatniegoKontaktu;
 }
 
-void zapiszUzytkownikowDoPliku (vector<Uzytkownicy> listaUzytkownikow)
+void zapiszUzytkownikowDoPliku (vector<Uzytkownik> listaUzytkownikow)
 {
     fstream plik;
     plik.open("Uzytkownicy.txt", ios::out);
 
-    for (vector<Uzytkownicy>::iterator itr = listaUzytkownikow.begin(); itr != listaUzytkownikow.end(); itr++)
+    for (vector<Uzytkownik>::iterator itr = listaUzytkownikow.begin(); itr != listaUzytkownikow.end(); itr++)
     {
-        plik <<itr->idUzytkownika<<'|'<<itr->login<<'|'<<itr->haslo<<'|'<<endl;
+        plik <<itr->idUzytkownika<<'|'<<itr->pobierzLogin()<<'|'<<itr->pobierzHaslo()<<'|'<<endl;
     }
     plik.close();
 }
 
-vector<Uzytkownicy> odczytajUzytkownikowZPliku (vector<Uzytkownicy> listaUzytkownikow, Uzytkownicy uzytkownik)
+vector<Uzytkownik> odczytajUzytkownikowZPliku (vector<Uzytkownik> listaUzytkownikow)
 {
     string login, haslo;
     int idUzytkownika = 0;
@@ -89,11 +111,9 @@ vector<Uzytkownicy> odczytajUzytkownikowZPliku (vector<Uzytkownicy> listaUzytkow
             haslo = linia.substr(0,pozycja);
             linia.erase(0,pozycja+1);
 
-            uzytkownik.idUzytkownika = idUzytkownika;
-            uzytkownik.login = login;
-            uzytkownik.haslo = haslo;
+            Uzytkownik uzytkownikKonta (idUzytkownika, login, haslo);
 
-            listaUzytkownikow.push_back(uzytkownik);
+            listaUzytkownikow.push_back(uzytkownikKonta);
         }
     }
     plik.close();
@@ -239,7 +259,7 @@ vector<KsiazkaAdresowa> odczytajZPliku (vector<KsiazkaAdresowa> adresaci, Ksiazk
     return adresaci;
 }
 
-vector<Uzytkownicy> rejestracja (vector<Uzytkownicy> listaUzytkownikow)
+vector<Uzytkownik> rejestracja (vector<Uzytkownik> listaUzytkownikow)
 {
     string login, haslo;
     int idUzytkownika = 0;
@@ -248,9 +268,9 @@ vector<Uzytkownicy> rejestracja (vector<Uzytkownicy> listaUzytkownikow)
     cout<< "Login: "<<endl;
     cin >> login;
 
-    for (vector<Uzytkownicy>::iterator itr = listaUzytkownikow.begin(); itr != listaUzytkownikow.end(); itr++)
+    for (vector<Uzytkownik>::iterator itr = listaUzytkownikow.begin(); itr != listaUzytkownikow.end(); itr++)
     {
-        if (itr->login == login)
+        if (itr->pobierzLogin() == login)
         {
             cout << "Taki uzytkownik istnieje. Podaj inny login: "<<endl;
             cin >> login;
@@ -259,8 +279,6 @@ vector<Uzytkownicy> rejestracja (vector<Uzytkownicy> listaUzytkownikow)
     }
     cout<< "Haslo: "<<endl;
     cin >> haslo;
-
-    Uzytkownicy uzytkownik;
 
     if (listaUzytkownikow.empty())
     {
@@ -272,10 +290,8 @@ vector<Uzytkownicy> rejestracja (vector<Uzytkownicy> listaUzytkownikow)
         idUzytkownika = listaUzytkownikow[wielkoscWektora-1].idUzytkownika + 1;
     }
 
-    uzytkownik.idUzytkownika = idUzytkownika;
-    uzytkownik.login = login;
-    uzytkownik.haslo = haslo;
-    listaUzytkownikow.push_back(uzytkownik);
+    Uzytkownik uzytkownikKonta (idUzytkownika,login,haslo);
+    listaUzytkownikow.push_back(uzytkownikKonta);
 
     cout << "Konto zarejestrowane pomyslnie"<<endl;
     Sleep(1500);
@@ -284,21 +300,21 @@ vector<Uzytkownicy> rejestracja (vector<Uzytkownicy> listaUzytkownikow)
     return listaUzytkownikow;
 }
 
-int logowanie (vector<Uzytkownicy> listaUzytkownikow)
+int logowanie (vector<Uzytkownik> listaUzytkownikow)
 {
     string login, haslo;
     cout<< "Aby sie zalogowac podaj login: "<<endl;
     cin >> login;
 
-    for (vector<Uzytkownicy>::iterator itr = listaUzytkownikow.begin(); itr != listaUzytkownikow.end(); itr++)
+    for (vector<Uzytkownik>::iterator itr = listaUzytkownikow.begin(); itr != listaUzytkownikow.end(); itr++)
     {
-        if (itr->login == login)
+        if (itr->pobierzLogin() == login)
         {
             for (int proby = 0; proby < 3; proby++)
             {
                 cout << "Podaj haslo. Ilosc prob: "<< 3-proby <<endl;
                 cin >> haslo;
-                if (itr->haslo == haslo)
+                if (itr->pobierzHaslo() == haslo)
                 {
                     cout << "Udalo sie zalogowac"<<endl;
                     Sleep(1500);
@@ -574,17 +590,17 @@ vector<KsiazkaAdresowa> edytowanieKontaktow (vector<KsiazkaAdresowa>adresaci)
     return adresaci;
 }
 
-vector<Uzytkownicy> zmianaHasla (int idZalogowanegoUzytkownika, vector<Uzytkownicy>listaUzytkownikow)
+vector<Uzytkownik> zmianaHasla (int idZalogowanegoUzytkownika, vector<Uzytkownik>listaUzytkownikow)
 {
     string noweHaslo;
     cout << "Podaj nowe haslo: "<<endl;
     cin >> noweHaslo;
 
-    for (vector<Uzytkownicy>::iterator itr = listaUzytkownikow.begin(); itr != listaUzytkownikow.end(); itr++)
+    for (vector<Uzytkownik>::iterator itr = listaUzytkownikow.begin(); itr != listaUzytkownikow.end(); itr++)
     {
         if (itr->idUzytkownika == idZalogowanegoUzytkownika)
         {
-            itr->haslo = noweHaslo;
+            itr->przypiszHaslo(noweHaslo);
             cout << "Twoje haslo zostalo zmienione "<<endl;
             Sleep(1500);
         }
@@ -619,11 +635,10 @@ int main()
 {
     vector<KsiazkaAdresowa> adresaci;
     KsiazkaAdresowa kontakt;
-    vector<Uzytkownicy> listaUzytkownikow;
-    Uzytkownicy uzytkownik;
+    vector<Uzytkownik> listaUzytkownikow;
     char wybor;
     int idZalogowanegoUzytkownika = 0;
-    listaUzytkownikow = odczytajUzytkownikowZPliku (listaUzytkownikow, uzytkownik);
+    listaUzytkownikow = odczytajUzytkownikowZPliku (listaUzytkownikow);
 
     while(1)
     {
